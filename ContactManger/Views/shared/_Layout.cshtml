@@ -1,0 +1,160 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Contact Manager — Dashboard</title>
+
+    <link rel="stylesheet" href="~/StyleSheetMain.css" />
+  
+
+</head>
+<body>
+    <div class="container">
+
+        <!-- Topbar -->
+        <header class="topbar" role="banner">
+            <a href="/" class="brand" aria-label="Contact Manager home">
+                <img src="~/Logs/FullLogo.png" alt="Contact Manager Logo" class="logo-img" />
+            </a>
+
+
+
+            <div class="nav-actions">
+                <nav class="nav-links" aria-label="Primary">
+                    <a href="/">Dashboard</a>
+                    <a asp-controller="person" asp-action="index">Contacts</a>
+                    <div class="dropdown">
+                        <a href="#" class="dropbtn">Countries ▼</a>
+                        <div class="dropdown-content">
+                            <a href="/AllCountry">All Countries</a>
+                            <a href="/Country/Add">Add Country</a>
+                            <a href="/Country/Stats">Country Stats</a>
+                        </div>
+                    </div>
+                    <a href="#">Reports</a>
+                </nav>
+                <!-- search -->
+                <div class="search" role="search"
+                     style="display:@(ViewContext.RouteData.Values["controller"].ToString().ToUpper() != "PERSON" ? "none" : "block")">
+                    <input type="search" placeholder="Search contacts..." aria-label="Search contacts" />
+                </div>
+
+
+                <!-- dark mode toggle -->
+                <button class="btn" id="themeToggle" title="Toggle theme">🌗</button>
+
+                <!-- user avatar -->
+                <div class="avatar" title="User"></div>
+
+                <!-- hamburger for mobile -->
+                <button class="hamburger" id="menuBtn" aria-label="Open menu">☰</button>
+            </div>
+        </header>
+
+        <!-- layout: sidebar + content -->
+        <main class="layout" role="main">
+            <!-- Sidebar -->
+            <aside class="sidebar" aria-label="Sidebar navigation">
+                <aside class="sidebar" aria-label="Sidebar navigation">
+                    <nav>
+                        <a href="/Person" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Person" && ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">
+                            📇 All Contacts
+                        </a>
+
+
+                        <a href="/AllCountry" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Country" ? "active" : "")">
+                            🌍 All Countries
+                        </a>
+
+                        <a href="#" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Setting" ? "active" : "")">
+                            ⚙️ Settings
+                        </a>
+                    </nav>
+                </aside>
+
+
+                <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.02)">
+
+                <div class="muted">Quick actions</div>
+                <div style="display:flex;gap:10px;margin-top:10px">
+                    <button class="btn-primary">New Contact</button>
+                    <button class="btn">Import</button>
+                </div>
+            </aside>
+
+            <!-- Content -->
+            <section class="content">
+                @RenderBody()
+
+            </section>
+        </main>
+
+        <footer>
+            © <span id="year"></span> Contact Manager • Built with ❤️
+        </footer>
+        @RenderSection("Scripts",false)
+    </div>
+
+    <script>
+        // small UX bits: theme toggle, mobile menu, year
+        (function() {
+          const html = document.documentElement;
+          const themeToggle = document.getElementById('themeToggle');
+          const menuBtn = document.getElementById('menuBtn');
+          const navLinks = document.querySelector('.nav-links');
+
+          // init year
+          document.getElementById('year').textContent = new Date().getFullYear();
+
+          // theme: persist in localStorage
+          const saved = localStorage.getItem('cm-theme');
+          if (saved === 'light') html.classList.add('light');
+
+          themeToggle?.addEventListener('click', () => {
+            html.classList.toggle('light');
+            localStorage.setItem('cm-theme', html.classList.contains('light') ? 'light' : 'dark');
+          });
+
+          // mobile menu
+          menuBtn?.addEventListener('click', () => {
+            if (!navLinks) return;
+            const visible = navLinks.style.display === 'flex';
+            navLinks.style.display = visible ? '' : 'flex';
+          });
+
+          // close mobile nav when resizing larger
+          window.addEventListener('resize', () => {
+            if (window.innerWidth > 820) navLinks.style.display = '';
+          });
+        })();
+    </script>
+    @section Scripts
+    {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.4/jquery.validate.min.js" integrity="sha512-FOhq9HThdn7ltbK8abmGn60A/EMtEzIzv1rvuh+DqzJtSGq8BRdEN0U+j0iKEIffiw/yEtVuladk6rsG4X6Uqg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js" integrity="sha512-o6XqxgrUsKmchwy9G5VRNWSSxTS4Urr4loO6/0hYdpWmFUfHqGzawGxeQGMDqYzxjY9sbktPbNlkIQJWagVZQg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    }
+    <style>
+        .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    /* background: #222;  adjust as needed */
+    }
+    .logo-img {
+    max-height: 100px; /* final size you want */
+    max-width: 2500px; /* restrict width */
+    width: auto; /* keep aspect ratio */
+    height: auto;
+    display: inline-block;
+    }
+
+    </style>
+    
+
+   
+</body>
+</html>
