@@ -1,5 +1,6 @@
 using ServiceContract;
 using services;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace ContactManger
@@ -14,8 +15,16 @@ namespace ContactManger
                  {
                      options.HtmlHelperOptions.ClientValidationEnabled = true;
                  }); ;
-            builder.Services.AddSingleton<ICountryService,CountryService>();
-            builder.Services.AddSingleton<IPerson, PersonService>();
+
+            //Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ContactManger;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False
+            builder.Services.AddScoped<ICountryService, CountryService>();
+            builder.Services.AddScoped<IPerson, PersonService>();
+            builder.Services.AddDbContext<ContactMangerDBContext>(
+                option => {
+                    option.UseSqlServer
+                            //(builder.Configuration["ConnectionStrings:DefaultCon"]));
+                            (builder.Configuration.GetConnectionString("DefaultCon"));
+                           });
             var app = builder.Build();
             app.UseStaticFiles();
             app.UseRouting();

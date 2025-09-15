@@ -6,23 +6,13 @@ namespace services
 {
     public class CountryService : ICountryService
     {
-        private readonly List<Entity.Country> _Countries;
+        private readonly ContactMangerDBContext _Db;
 
 
-        public CountryService(bool init=true)
+        public CountryService(ContactMangerDBContext dbContext, bool init=true)
         {
-            if (init)
-            {
-                _Countries = new List<Country>{
-            new Entity.Country { id = Guid.NewGuid(), CountryName = "India" ,CountryCode ="+91"},
-            new Entity.Country { id = Guid.NewGuid(), CountryName = "USA",CountryCode="+11" },
-            new Entity.Country { id = Guid.NewGuid(), CountryName = "Germany",CountryCode = "+99" }
-        };
-            }
-            else
-            {
-                _Countries = new List<Country>();
-            }
+            _Db = dbContext;
+           
         }
         public Guid id { get; set; }
         public string? CountryName { get; set; }
@@ -40,7 +30,7 @@ namespace services
                 throw new ArgumentException(nameof(countryAddReq.CountryName));
             }
 
-            if(_Countries.Where(temp => temp.CountryName == countryAddReq.CountryName).Count()>0)
+            if(_Db.countries.Where(temp => temp.CountryName == countryAddReq.CountryName).Count()>0)
             {
 
                 throw new ArgumentException("Country already exists");
@@ -48,7 +38,8 @@ namespace services
 
             Entity.Country con = countryAddReq.ToCountry();
             con.id = Guid.NewGuid();
-            _Countries.Add(con);
+            _Db.countries.Add(con);
+            _Db.SaveChanges();
             return con.ToCountryRes();
 
 
@@ -57,7 +48,7 @@ namespace services
         public List<CountryRes> GetAllCountries()
         {
             List<CountryRes> resList = new List<CountryRes>();
-            foreach(Entity.Country con in _Countries)
+            foreach(Entity.Country con in _Db.countries)
             {
                 resList.Add(con.ToCountryRes());
             }
@@ -66,12 +57,12 @@ namespace services
 
         public CountryRes? GetCountryById(Guid? guid)
         {
-            return _Countries.FirstOrDefault(con => con.id == guid)?.ToCountryRes() ;
+            return _Db.countries.FirstOrDefault(con => con.id == guid)?.ToCountryRes() ;
         }
         public bool DeleteCountry(Guid id)
         {
             // Find the country in the list
-            var country = _Countries.FirstOrDefault(c => c.id == id);
+            var country = _Db.countries.FirstOrDefault(c => c.id == id);
 
             if (country == null)
             {
@@ -80,7 +71,8 @@ namespace services
             }
 
             // Remove from the list
-            _Countries.Remove(country);
+            _Db.countries.Remove(country);
+            _Db.SaveChanges();
             return true;
         }
 
@@ -93,12 +85,12 @@ namespace services
                 throw new ArgumentException(nameof(countryUpdateReq.CountryName));
 
             // Find the existing country
-            var country = _Countries.FirstOrDefault(c => c.id == id);
+            var country = _Db.countries.FirstOrDefault(c => c.id == id);
             if (country == null)
                 return null; // country not found
 
             // Check if the new name already exists in another country
-            if (_Countries.Any(c => c.id != id && c.CountryName == countryUpdateReq.CountryName))
+            if (_Db.countries.Any(c => c.id != id && c.CountryName == countryUpdateReq.CountryName))
                 throw new ArgumentException("Another country with the same name already exists");
 
             // Update country properties
