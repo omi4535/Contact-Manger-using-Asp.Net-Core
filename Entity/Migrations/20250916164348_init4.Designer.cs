@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using services;
 
@@ -11,9 +12,11 @@ using services;
 namespace Entity.Migrations
 {
     [DbContext(typeof(ContactMangerDBContext))]
-    partial class ContactMangerDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250916164348_init4")]
+    partial class init4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,28 +79,7 @@ namespace Entity.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CountryId");
-
-                    b.ToTable("people", t =>
-                        {
-                            t.HasCheckConstraint("Chk_fName", "len(FirstName)>3");
-                        });
-                });
-
-            modelBuilder.Entity("Entity.Person", b =>
-                {
-                    b.HasOne("Entity.Country", "country")
-                        .WithMany("PeopleFromCountry")
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("country");
-                });
-
-            modelBuilder.Entity("Entity.Country", b =>
-                {
-                    b.Navigation("PeopleFromCountry");
+                    b.ToTable("people");
                 });
 #pragma warning restore 612, 618
         }

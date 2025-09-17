@@ -27,7 +27,9 @@ namespace Entity
         [Phone]
         [StringLength(12)]
         public string? PhoneNumber { get; set; }
+        public string? Address { get; set; }
 
         public Guid CountryId { get; set; }
+        public Country? country { get; set; }
     }
 }

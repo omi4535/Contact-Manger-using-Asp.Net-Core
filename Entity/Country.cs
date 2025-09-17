@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace Entity
 {
@@ -10,6 +11,6 @@ namespace Entity
         public string CountryName { get; set; }
         [StringLength(5)]
         public string? CountryCode { get; set; }
-        
+        public ICollection<Person> PeopleFromCountry { get; set; }
     }
 }

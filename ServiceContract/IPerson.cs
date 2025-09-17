@@ -2,18 +2,17 @@
 using ServiceContract.DTO.Person;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ServiceContract
 {
     public interface IPerson
     {
-        public PersonRes AddPerson(PersonAddReq req);
-        public PersonRes EditPerson(PersonEditReq req);
-        public bool DeletePerson(Guid guid);
-        public List<PersonRes> GetAllPerson();
-        public PersonRes GetPersonById(Guid? guid);
+        Task<PersonRes> AddPersonAsync(PersonAddReq req);
+        Task<PersonRes> EditPersonAsync(PersonEditReq req);
+        Task<bool> DeletePersonAsync(Guid guid);
+        Task<List<PersonRes>> GetAllPersonAsync();
+        Task<PersonRes?> GetPersonByIdAsync(Guid? guid);
+        Task GetAllPersonWithSpAsync();
     }
 }

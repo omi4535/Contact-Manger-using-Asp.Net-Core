@@ -51,8 +51,8 @@ namespace ServiceContract.DTO.Person
                 FirstName = person.FirstName,
                 LastName = person.LastName,
                 Email = person.Email,
-                PhoneNumber = _country.GetCountryById(person.CountryId).CountryCode +" "+ person.PhoneNumber,
-                CountryName = _country.GetCountryById(person.CountryId).CountryName
+                PhoneNumber = person.country?.CountryCode +" "+ person.PhoneNumber,
+                CountryName = person.country?.CountryName
             };
         }
     }
