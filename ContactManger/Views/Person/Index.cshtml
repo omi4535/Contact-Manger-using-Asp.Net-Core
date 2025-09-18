@@ -10,6 +10,8 @@
 <section class="hero">
     <h1 class="title">All People 👥</h1>
     <button id="openPersonModalBtn" class="btn-primary">➕ Add Person</button>
+    <a id="PersonPdf" class="btn-primary" href="/Person/Pdf">Print Contacts</a>
+    <a id="PersonCsv" class="btn-primary" href="/Person/Csv">Print Contacts</a>
 </section>
 
 @if (personCount == 0)
@@ -19,6 +21,7 @@
             ⚠️ No people have been added yet.
         </p>
         <button id="openPersonModalBtn2" class="btn-primary">Add Person</button>
+
     </div>
 }
 else
@@ -62,6 +65,8 @@ else
         var personId = $(this).data('id');
         PassDataToPartialView(personId);
     });
+
+
 </script>
 @{
     Html.RenderPartial("AddPersonPartial",new PersonAddReq());

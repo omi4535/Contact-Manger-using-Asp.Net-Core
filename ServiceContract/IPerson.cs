@@ -14,5 +14,6 @@ namespace ServiceContract
         Task<List<PersonRes>> GetAllPersonAsync();
         Task<PersonRes?> GetPersonByIdAsync(Guid? guid);
         Task GetAllPersonWithSpAsync();
+        Task<MemoryStream> GetPersonCSV();
     }
 }

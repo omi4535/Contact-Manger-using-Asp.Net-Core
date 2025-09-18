@@ -40,7 +40,7 @@ namespace ServiceContract.DTO.Person
 
     public static class PersonExtension
     {
-        public static PersonRes ToPersonRes(this Entity.Person person,ICountryService _country)
+        public static PersonRes ToPersonRes(this Entity.Person person)
         {
             if (person == null)
                 throw new ArgumentNullException(nameof(person));

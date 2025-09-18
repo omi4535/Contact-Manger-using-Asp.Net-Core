@@ -4,6 +4,7 @@ using ServiceContract.DTO.Person;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Rotativa.AspNetCore;
 
 namespace ContactManger.Controllers
 {
@@ -62,6 +63,23 @@ namespace ContactManger.Controllers
                 return NotFound();
 
             return Json(person);
+        }
+        [Route("Person/PDF")]
+        public async Task<IActionResult> PersonToPdf()
+        {
+            var people = await _person.GetAllPersonAsync();
+
+            return new ViewAsPdf("PersonToPdf", people.ToList())
+            {
+                FileName = "Persons.pdf"
+            };
+        }
+
+        [Route("Person/CSV")]
+        public async Task<IActionResult> PersonToCsv()
+        {
+            var memoryStream = await _person.GetPersonCSV();
+            return File(memoryStream, "text/csv", "People.csv");
         }
     }
 }
