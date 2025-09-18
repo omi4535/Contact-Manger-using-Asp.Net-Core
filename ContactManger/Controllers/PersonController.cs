@@ -1,15 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ServiceContract;
 using ServiceContract.DTO.Person;
-using System.Reflection;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Rotativa.AspNetCore;
 
 namespace ContactManger.Controllers
 {
-   
     public class PersonController : Controller
     {
         private readonly IPerson _person;
         private readonly ICountryService _country;
+
         public PersonController(IPerson person, ICountryService con)
         {
             _person = person;
@@ -17,40 +20,66 @@ namespace ContactManger.Controllers
         }
 
         [Route("person")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            ViewBag.CountryDD = _country.GetAllCountries().Select(temp =>
-            new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem(
-            temp.CountryName,temp.id.ToString()
-            ));
-            return View(_person.GetAllPerson());
+            // Load dropdown countries
+            ViewBag.CountryDD = (await _country.GetAllCountriesAsync())
+                .Select(temp => new SelectListItem(temp.CountryName, temp.id.ToString()))
+                .ToList();
+
+            // Call stored procedure (if needed)
+            await _person.GetAllPersonWithSpAsync();
+
+            // Pass actual list of persons to the view
+            var people = await _person.GetAllPersonAsync();
+            return View(people);
         }
 
+        [HttpPost]
         [Route("Person/Add")]
-        public IActionResult Add(PersonAddReq addReq)
+        public async Task<IActionResult> Add(PersonAddReq addReq)
         {
-            if (ModelState.IsValid)
-            {
-                _person.AddPerson(addReq);
-            }
-            else
+            if (!ModelState.IsValid)
             {
                 return PartialView("AddPersonPartial", addReq);
             }
 
-                return RedirectToAction("Index");
+            await _person.AddPersonAsync(addReq);
+            return RedirectToAction("Index");
         }
+
         [Route("Person/Delete/{guid:guid}")]
-        public IActionResult Delete(Guid guid)
+        public async Task<IActionResult> Delete(Guid guid)
         {
-            _person.DeletePerson(guid);
+            await _person.DeletePersonAsync(guid);
             return RedirectToAction("Index");
         }
 
         [Route("Person/GetPersonById/{id:guid}")]
-        public IActionResult GetPersonByid(Guid id)
+        public async Task<IActionResult> GetPersonById(Guid id)
         {
-            return Json(_person.GetPersonById(id));
+            var person = await _person.GetPersonByIdAsync(id);
+            if (person == null)
+                return NotFound();
+
+            return Json(person);
+        }
+        [Route("Person/PDF")]
+        public async Task<IActionResult> PersonToPdf()
+        {
+            var people = await _person.GetAllPersonAsync();
+
+            return new ViewAsPdf("PersonToPdf", people.ToList())
+            {
+                FileName = "Persons.pdf"
+            };
+        }
+
+        [Route("Person/CSV")]
+        public async Task<IActionResult> PersonToCsv()
+        {
+            var memoryStream = await _person.GetPersonCSV();
+            return File(memoryStream, "text/csv", "People.csv");
         }
     }
 }

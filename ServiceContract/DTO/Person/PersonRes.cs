@@ -40,7 +40,7 @@ namespace ServiceContract.DTO.Person
 
     public static class PersonExtension
     {
-        public static PersonRes ToPersonRes(this Entity.Person person,ICountryService _country)
+        public static PersonRes ToPersonRes(this Entity.Person person)
         {
             if (person == null)
                 throw new ArgumentNullException(nameof(person));
@@ -51,8 +51,8 @@ namespace ServiceContract.DTO.Person
                 FirstName = person.FirstName,
                 LastName = person.LastName,
                 Email = person.Email,
-                PhoneNumber = _country.GetCountryById(person.CountryId).CountryCode +" "+ person.PhoneNumber,
-                CountryName = _country.GetCountryById(person.CountryId).CountryName
+                PhoneNumber = person.country?.CountryCode +" "+ person.PhoneNumber,
+                CountryName = person.country?.CountryName
             };
         }
     }

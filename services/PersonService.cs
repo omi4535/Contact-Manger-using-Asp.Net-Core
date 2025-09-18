@@ -1,27 +1,29 @@
-﻿using Entity;
+﻿using CsvHelper;
+using Entity;
+using Microsoft.EntityFrameworkCore;
 using ServiceContract;
 using ServiceContract.DTO.Person;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace services
 {
     public class PersonService : IPerson
     {
-        private readonly List<Entity.Person> _people;
+        private readonly ContactMangerDBContext _Db;
         private readonly ICountryService _country;
-        public PersonService( ICountryService con ,bool init=true)
-        {
-            
-            _people = new List<Entity.Person>();
 
+        public PersonService(ContactMangerDBContext contactMangerDbContext, ICountryService con, bool init = true)
+        {
+            _Db = contactMangerDbContext;
             _country = con;
         }
-        public PersonRes AddPerson(PersonAddReq req)
+
+        public async Task<PersonRes> AddPersonAsync(PersonAddReq req)
         {
             if (req == null)
                 throw new ArgumentNullException(nameof(req));
@@ -34,72 +36,102 @@ namespace services
 
             if (!isValid)
             {
-                // You can throw with all error messages combined
                 string errors = string.Join("; ", results.Select(r => r.ErrorMessage));
-                throw new ValidationException($"Invalid person data: {errors}");
+                throw new System.ComponentModel.DataAnnotations.ValidationException($"Invalid person data: {errors}");
             }
 
             Person p = req.ToPerson();
-            _people.Add(p);
-            return p.ToPersonRes(_country);
+            await _Db.people.AddAsync(p);
+            await _Db.SaveChangesAsync();
+            return p.ToPersonRes();
         }
-        public bool DeletePerson(Guid guid)
-        {
-            if (guid == null)
-                throw new ArgumentNullException(nameof(guid));
 
-            var existingPerson = _people.FirstOrDefault(p => p.Id == guid);
+        public async Task<bool> DeletePersonAsync(Guid guid)
+        {
+            var existingPerson = await _Db.people.FirstOrDefaultAsync(p => p.Id == guid);
 
             if (existingPerson == null)
                 return false;
 
-            _people.Remove(existingPerson);
+            _Db.people.Remove(existingPerson);
+            await _Db.SaveChangesAsync();
             return true;
         }
 
-
-        public PersonRes EditPerson(PersonEditReq req)
+        public async Task<PersonRes> EditPersonAsync(PersonEditReq req)
         {
             if (req == null)
                 throw new ArgumentNullException(nameof(req));
 
-            // Find the existing person
-            var existingPerson = _people.FirstOrDefault(p => p.Id == req.Id);
+            var existingPerson = await _Db.people.FirstOrDefaultAsync(p => p.Id == req.Id);
 
             if (existingPerson == null)
                 throw new KeyNotFoundException("Person not found");
 
-            // Update fields
             existingPerson.FirstName = req.FirstName;
             existingPerson.LastName = req.LastName;
             existingPerson.Email = req.Email;
             existingPerson.PhoneNumber = req.PhoneNumber;
             existingPerson.CountryId = req.CountryId;
 
-            // Return updated PersonRes
-            return existingPerson.ToPersonRes(_country);
+            await _Db.SaveChangesAsync();
+
+            return existingPerson.ToPersonRes();
         }
 
-
-        public List<PersonRes> GetAllPerson()
+        public async Task<List<PersonRes>> GetAllPersonAsync()
         {
+            var peopleList = await _Db.people.ToListAsync();
+
             List<PersonRes> reslist = new List<PersonRes>();
-            foreach (Person person in _people)
+            foreach (Person person in peopleList)
             {
-                reslist.Add(person.ToPersonRes(_country));
+                reslist.Add(person.ToPersonRes());
             }
+
             return reslist;
         }
 
-        public PersonRes? GetPersonById(Guid? guid)
+        public async Task<PersonRes?> GetPersonByIdAsync(Guid? guid)
         {
             if (guid == null)
                 throw new ArgumentNullException(nameof(guid));
 
-            var person = _people.FirstOrDefault(p => p.Id == guid.Value);
-
-            return person?.ToPersonRes(_country); // null if not found
+            var person = await _Db.people.FirstOrDefaultAsync(p => p.Id == guid.Value);
+            return person?.ToPersonRes();
         }
 
+        public async Task GetAllPersonWithSpAsync()
+        {
+
+            List<Person> people =  _Db.people.Include("country").ToList();
+            
+        }
+
+        public async Task<MemoryStream> GetPersonCSV()
+        {
+            var memoryStream = new MemoryStream();
+
+            // Use leaveOpen = true so the stream isn't disposed when writers are disposed
+            using (var streamWriter = new StreamWriter(memoryStream, leaveOpen: true))
+            using (var csvWriter = new CsvWriter(streamWriter, CultureInfo.InvariantCulture))
+            {
+                // Get data
+                List<PersonRes> personRes = _Db.people.Include("country")
+                    .Select(temp => temp.ToPersonRes())
+                    .ToList();
+
+                // Write header + records
+                csvWriter.WriteHeader<PersonRes>();
+                await csvWriter.NextRecordAsync();
+                await csvWriter.WriteRecordsAsync(personRes);
+
+                await streamWriter.FlushAsync();
+            }
+
+            // Reset position so caller can read from start
+            memoryStream.Position = 0;
+            return memoryStream;
+        }
     }
 }

@@ -48,6 +48,12 @@ namespace Entity.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Address")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(8)")
+                        .HasDefaultValue("Pune")
+                        .HasColumnName("FullAddress");
+
                     b.Property<Guid>("CountryId")
                         .HasColumnType("uniqueidentifier");
 
@@ -70,7 +76,28 @@ namespace Entity.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("people");
+                    b.HasIndex("CountryId");
+
+                    b.ToTable("people", t =>
+                        {
+                            t.HasCheckConstraint("Chk_fName", "len(FirstName)>3");
+                        });
+                });
+
+            modelBuilder.Entity("Entity.Person", b =>
+                {
+                    b.HasOne("Entity.Country", "country")
+                        .WithMany("PeopleFromCountry")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("country");
+                });
+
+            modelBuilder.Entity("Entity.Country", b =>
+                {
+                    b.Navigation("PeopleFromCountry");
                 });
 #pragma warning restore 612, 618
         }

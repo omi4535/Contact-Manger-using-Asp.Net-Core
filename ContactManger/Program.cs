@@ -27,6 +27,7 @@ namespace ContactManger
                            });
             var app = builder.Build();
             app.UseStaticFiles();
+            Rotativa.AspNetCore.RotativaConfiguration.Setup("wwwroot", "Ratativa");
             app.UseRouting();
             app.MapControllers();
             app.Run();
