@@ -6,12 +6,12 @@
     ViewData["Title"] = "All People";
     var personCount = Model.Count();
 }
-
+@* @ViewData["XYZ"]  *@
 <section class="hero">
     <h1 class="title">All People 👥</h1>
     <button id="openPersonModalBtn" class="btn-primary">➕ Add Person</button>
     <a id="PersonPdf" class="btn-primary" href="/Person/Pdf">Print Contacts</a>
-    <a id="PersonCsv" class="btn-primary" href="/Person/Csv">Print Contacts</a>
+    <a id="PersonCsv" class="btn-primary" href="/Person/Csv">Export Contacts</a>
 </section>
 
 @if (personCount == 0)

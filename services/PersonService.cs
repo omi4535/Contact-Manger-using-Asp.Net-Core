@@ -15,12 +15,10 @@ namespace services
     public class PersonService : IPerson
     {
         private readonly ContactMangerDBContext _Db;
-        private readonly ICountryService _country;
-
-        public PersonService(ContactMangerDBContext contactMangerDbContext, ICountryService con, bool init = true)
+        public PersonService(ContactMangerDBContext contactMangerDbContext)
         {
             _Db = contactMangerDbContext;
-            _country = con;
+
         }
 
         public async Task<PersonRes> AddPersonAsync(PersonAddReq req)
@@ -81,6 +79,7 @@ namespace services
 
         public async Task<List<PersonRes>> GetAllPersonAsync()
         {
+            //throw new Exception("Custome one");
             var peopleList = await _Db.people.ToListAsync();
 
             List<PersonRes> reslist = new List<PersonRes>();
