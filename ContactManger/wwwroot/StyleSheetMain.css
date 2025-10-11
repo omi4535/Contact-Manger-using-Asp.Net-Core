@@ -1,5 +1,94 @@
 ﻿
 /* ---------- VARIABLES ---------- */
+/* -----------------------------
+   Dark-Themed Error Page Styles
+----------------------------- */
+
+.error-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+    min-height: 80vh;
+    background: var(--bg, #0b0f14);
+    color: #e6eef6;
+}
+
+.error-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+    padding: 32px;
+    max-width: 720px;
+    width: 100%;
+    animation: fadeIn 0.5s ease;
+}
+
+.error-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.error-code {
+    display: inline-block;
+    background: linear-gradient(90deg, #7c5cff, #6ea0ff);
+    color: #0b0f14;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.error-lead {
+    color: #9aa6b2;
+    font-size: 15px;
+}
+
+.error-meta {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: #9aa6b2;
+    margin-top: 8px;
+}
+
+.error-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.error-details {
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 20px;
+    font-family: ui-monospace, monospace;
+    font-size: 13px;
+    color: #cfe8ff;
+    overflow: auto;
+    max-height: 260px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
 .nav-links {
     display: flex;
     gap: 20px;

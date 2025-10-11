@@ -25,9 +25,7 @@ namespace ContactManger.Middleware
             catch(Exception ex)
             {
                 _log.LogError(ex,"Error Occured");
-                httpContext.Response.StatusCode = 500;
-                await httpContext.Response.WriteAsJsonAsync("Error Occured");
-              
+                throw;
             }
         }
     }
