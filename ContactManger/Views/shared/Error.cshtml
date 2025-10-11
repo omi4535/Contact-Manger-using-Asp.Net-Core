@@ -1,0 +1,49 @@
+﻿@using Microsoft.AspNetCore.Diagnostics
+@{
+    Layout = "_Layout";
+    var exceptionFeature = Context.Features.Get<IExceptionHandlerPathFeature>();
+    ViewData["Title"] = "Error";
+}
+
+<section class="error-wrapper">
+    <div class="error-card">
+        <div class="error-header">
+            <span class="error-code">500</span>
+            <h1>Oops — Something went wrong</h1>
+            <p class="error-lead">We encountered an unexpected issue while processing your request.</p>
+        </div>
+
+        <div class="error-meta">
+            <span>Path: <strong>@exceptionFeature?.Path</strong></span>
+            <span>Time: <strong>@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")</strong></span>
+        </div>
+
+        <div class="error-actions" style="padding:10px;">
+            <a href="/" class="btn-primary">🏠 Go to Dashboard</a>
+            <button class="btn" onclick="location.reload()">🔁 Retry</button>
+            <button class="btn" id="toggleDetails">🪶 Show Details</button>
+        </div>
+
+        <div class="error-details" id="errorDetails" hidden>
+            <h3>Exception Details</h3>
+            <pre>@exceptionFeature?.Error?.Message</pre>
+            <pre>@exceptionFeature?.Error?.StackTrace</pre>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.getElementById("toggleDetails")?.addEventListener("click", function () {
+            const details = document.getElementById("errorDetails");
+            const hidden = details.hasAttribute("hidden");
+            if (hidden) {
+                details.removeAttribute("hidden");
+                this.textContent = "🙈 Hide Details";
+            } else {
+                details.setAttribute("hidden", "");
+                this.textContent = "🪶 Show Details";
+            }
+        });
+    </script>
+}

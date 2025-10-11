@@ -1,8 +1,5 @@
-using ServiceContract;
-using services;
-using Microsoft.EntityFrameworkCore;
-
-
+using ContactManger.serviceExtensionMethod;
+using ContactManger.Middleware;
 namespace ContactManger
 {
     public class Program
@@ -10,24 +7,21 @@ namespace ContactManger
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddControllersWithViews()
-                 .AddViewOptions(options =>
-                 {
-                     options.HtmlHelperOptions.ClientValidationEnabled = true;
-                 }); ;
-
-            //Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ContactManger;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False
-            builder.Services.AddScoped<ICountryService, CountryService>();
-            builder.Services.AddScoped<IPerson, PersonService>();
-            builder.Services.AddDbContext<ContactMangerDBContext>(
-                option => {
-                    option.UseSqlServer
-                            //(builder.Configuration["ConnectionStrings:DefaultCon"]));
-                            (builder.Configuration.GetConnectionString("DefaultCon"));
-                           });
+            builder.Services.ServiceCongi(builder.Configuration);
             var app = builder.Build();
-            app.UseStaticFiles();
+            if (builder.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseExceptionHandlingMiddleware();
+            }
+                app.UseStaticFiles();
             Rotativa.AspNetCore.RotativaConfiguration.Setup("wwwroot", "Ratativa");
+            //app.Logger.LogInformation("info");
+            //app.Logger.LogCritical("Critical");
             app.UseRouting();
             app.MapControllers();
             app.Run();

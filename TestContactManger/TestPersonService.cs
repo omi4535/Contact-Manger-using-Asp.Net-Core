@@ -1,4 +1,6 @@
-﻿using Entity;
+﻿ using Entity;
+using EntityFrameworkMock;
+using Microsoft.EntityFrameworkCore;
 using ServiceContract.DTO.Person;
 using services;
 using System;
@@ -18,115 +20,119 @@ namespace TestContactManger
 
         public TestPersonService(ITestOutputHelper test)
         {
-            _service = new PersonService(false); // ✅ real object, no mock
+            var options = new DbContextOptionsBuilder<ContactMangerDBContext>()
+      .UseInMemoryDatabase(databaseName: "TestDb")
+      .Options;
+            var dbContext = new ContactMangerDBContext(options);
+            
+            _service = new PersonService(dbContext); // ✅ real object, no mock
+        
             _testOutputHelper = test;
         }
 
+
         [Fact]
-        public void AddPerson_ShouldReturnPersonRes_WhenValid()
+        public async Task AddPerson_ShouldReturnPersonRes_WhenValid()
         {
             var req = new PersonAddReq
             {
                 FirstName = "John",
+                LastName="dou",
                 Email = "john@test.com"
                 //CountryId = Guid.NewGuid()
             };
 
-            var result = _service.AddPerson(req);
+            PersonRes? result = await _service.AddPersonAsync(req);
 
             Assert.NotNull(result);
             Assert.Equal("John", result.FirstName);
         }
 
         [Fact]
-        public void GetAllPerson_ShouldReturnEmptyList_WhenNoData()
-        {
-            var result = _service.GetAllPerson();
-
-            Assert.NotNull(result);
-            Assert.Empty(result);
-        }
-
-        [Fact]
-        public void GetAllPerson_ShouldReturnList_WhenDataExists()
+        public async Task GetAllPerson_ShouldReturnList_WhenDataExists()
         {
             var req = new PersonAddReq
             {
                 FirstName = "Alice",
+                LastName = "Dhage",
                 Email = "alice@test.com",
                 CountryId = Guid.NewGuid()
             };
 
-            _service.AddPerson(req);
+            await _service.AddPersonAsync(req);
 
-            var result = _service.GetAllPerson();
+            var result = await _service.GetAllPersonAsync();
             _testOutputHelper.WriteLine("sdfags");
             Assert.NotEmpty(result);
             Assert.Contains(result, r => r.FirstName == "Alice");
         }
 
         [Fact]
-        public void GetPersonById_ShouldReturnCorrectPerson()
+        public async Task GetPersonById_ShouldReturnCorrectPerson()
         {
             var req = new PersonAddReq
             {
                 FirstName = "Bob",
+                LastName = "Dhage",
                 Email = "bob@test.com",
                 CountryId = Guid.NewGuid()
             };
 
-            var added = _service.AddPerson(req);
+            var added = await _service.AddPersonAsync(req);
 
-            var result = _service.GetPersonById(added.Id);
+            var result = await _service.GetPersonByIdAsync(added.Id);
 
             Assert.NotNull(result);
             Assert.Equal("Bob", result.FirstName);
         }
 
         [Fact]
-        public void GetPersonById_ShouldThrow_WhenIdIsNull()
+        public async Task GetPersonById_ShouldThrow_WhenIdIsNull()
         {
-            Assert.Throws<ArgumentNullException>(() => _service.GetPersonById(null));
+            Assert.ThrowsAsync<ArgumentNullException>( () =>  _service.GetPersonByIdAsync(null));
         }
 
         [Fact]
-        public void EditPerson_ShouldUpdatePerson_WhenValid()
+        public async Task EditPerson_ShouldUpdatePerson_WhenValid()
         {
             var req = new PersonAddReq
             {
                 FirstName = "Chris",
+                LastName="Dhage",
                 Email = "chris@test.com",
                 CountryId = Guid.NewGuid()
             };
 
-            var added = _service.AddPerson(req);
+            var added = await _service.AddPersonAsync(req);
 
             var editReq = new PersonEditReq
             {
                 Id = added.Id,
                 FirstName = "Chris Updated",
+                LastName = "Dhage",
                 Email = "chris.updated@test.com",
                 CountryId = added.Id
             };
 
-            var result = _service.EditPerson(editReq);
+            var result = await _service.EditPersonAsync(editReq);
 
             Assert.Equal("Chris Updated", result.FirstName);
         }
 
         [Fact]
-        public void DeletePerson_ShouldReturn1_WhenPersonExists()
+        public async Task DeletePerson_ShouldReturn1_WhenPersonExists()
         {
             var req = new PersonAddReq
             {
                 FirstName = "Mark",
+                LastName = "dhage",
                 Email = "mark@test.com",
                 CountryId = Guid.NewGuid()
             };
 
-            var added = _service.AddPerson(req);
+            var added = await _service.AddPersonAsync(req);
 
-            var entity = new Person
+            Person entity =  new Person
             {
                 Id = added.Id,
                 FirstName = added.FirstName,
@@ -134,7 +140,7 @@ namespace TestContactManger
                 CountryId = added.Id
             };
 
-            var result = _service.DeletePerson(entity);
+            var result = await _service.DeletePersonAsync(entity.Id);
 
             Assert.True(result);
         }

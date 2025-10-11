@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ContactManger.Filters.ResultFilters;
+using Microsoft.AspNetCore.Mvc;
 using ServiceContract;
 using ServiceContract.DTO.Countries;
 using System;
@@ -16,6 +17,7 @@ namespace ContactManger.Controllers
         }
 
         [Route("AllCountry")]
+        [TypeFilter(typeof(CountryResultFilter),Arguments = new object[] {"arg"})]
         public async Task<IActionResult> Index()
         {
             var countries = await _countryService.GetAllCountriesAsync();
